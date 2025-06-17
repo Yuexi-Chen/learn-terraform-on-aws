@@ -1,8 +1,13 @@
+variable "project_name" {
+  description = "A unique name for the project, used as a prefix for all resources."
+  type        = string
+  default     = "kioque"
+}
 
 variable "aws_region" {
   description = "The AWS region where resources will be created."
   type        = string
-  default     = "eu-west-1" // Ireland region, aligning with job posting location.
+  default     = "us-east-1"
 }
 
 variable "cluster_name" {

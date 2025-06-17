@@ -1,30 +1,27 @@
+data "aws_availability_zones" "available" {}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  // Upgrade to a version compatible with AWS provider v5.
   version = "~> 5.5"
 
-  name = "devops-project-vpc"
-  cidr = var.vpc_cidr
+  name = "${var.project_name}-vpc"
+  cidr = "10.0.0.0/16"
 
   azs             = slice(data.aws_availability_zones.available.names, 0, 2)
-  private_subnets = var.private_subnets_cidr
-  public_subnets  = var.public_subnets_cidr
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+  public_subnets  = ["10.0.3.0/24", "10.0.4.0/24"]
 
   enable_nat_gateway   = true
   single_nat_gateway   = true
   enable_dns_hostnames = true
 
-  // Tags required by EKS for service discovery (e.g., Load Balancers).
   public_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                  = "1"
+    "kubernetes.io/cluster/${var.project_name}-eks-cluster" = "shared"
+    "kubernetes.io/role/elb"                                = "1"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"         = "1"
+    "kubernetes.io/cluster/${var.project_name}-eks-cluster" = "shared"
+    "kubernetes.io/role/internal-elb"                       = "1"
   }
 }
-
-// Data source to get the available availability zones in the current region.
-data "aws_availability_zones" "available" {}
